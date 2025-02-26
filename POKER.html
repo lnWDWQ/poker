@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>德州撲克抽水計算器 - 練習模式</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .timer {
+            font-size: 1.2em;
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>德州撲克抽水計算器 - 練習模式</h1>
+        
+        <label for="rakePercentage">抽水比例 (1% 至 10%):</label>
+        <input type="number" id="rakePercentage" min="1" max="10" value="5">
+        
+        <button onclick="startGame()">開始遊戲</button>
+        
+        <div class="timer" id="timer">剩餘時間：30 秒</div>
+        
+        <label for="totalPot">總底池金額 ($):</label>
+        <input type="number" id="totalPot" readonly>
+        
+        <label for="userAnswer">你的答案 ($):</label>
+        <input type="number" id="userAnswer" placeholder="輸入你的答案">
+        
+        <button onclick="checkAnswer()">提交答案</button>
+        <button onclick="resetGame()">再玩一次</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let totalPot;
+        let rakePercentage;
+        let correctAnswer;
+        let timer;
+
+        // 開始遊戲
+        function startGame() {
+            // 獲取抽水比例
+            rakePercentage = parseFloat(document.getElementById('rakePercentage').value);
+            if (isNaN(rakePercentage) || rakePercentage < 1 || rakePercentage > 10) {
+                alert("請輸入有效的抽水比例（1% 至 10%）！");
+                return;
+            }
+
+            // 隨機生成總底池金額（100 至 100000）
+            totalPot = Math.floor(Math.random() * 99901) + 100; // 100 到 100000
+            document.getElementById('totalPot').value = totalPot;
+
+            // 啟用輸入欄位
+            document.getElementById('userAnswer').disabled = false;
+            document.getElementById('userAnswer').value = '';
+            document.getElementById('result').innerText = '';
+
+            // 開始倒數計時
+            startTimer(30);
+        }
+
+        // 開始倒數計時
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            timer = setInterval(() => {
+                document.getElementById('timer').innerText = `剩餘時間：${timeLeft} 秒`;
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    showCorrectAnswer();
+                }
+            }, 1000);
+        }
+
+        // 顯示正確答案
+        function showCorrectAnswer() {
+            const rakeAmount = totalPot * (rakePercentage / 100);
+            correctAnswer = totalPot - rakeAmount;
+
+            document.getElementById('result').innerHTML = `
+                <p>時間到！正確答案是：$${correctAnswer.toFixed(2)}</p>
+            `;
+            document.getElementById('userAnswer').disabled = true;
+        }
+
+        // 檢查用戶答案
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('userAnswer').value);
+            if (isNaN(userAnswer)) {
+                document.getElementById('result').innerText = "請輸入有效的數字！";
+                return;
+            }
+
+            const rakeAmount = totalPot * (rakePercentage / 100);
+            correctAnswer = totalPot - rakeAmount;
+
+            if (Math.abs(userAnswer - correctAnswer) < 0.01) {
+                document.getElementById('result').innerHTML = `
+                    <p style="color: green;">正確！你的答案：$${userAnswer.toFixed(2)}</p>
+                `;
+            } else {
+                document.getElementById('result').innerHTML = `
+                    <p style="color: red;">錯誤！正確答案是：$${correctAnswer.toFixed(2)}</p>
+                `;
+            }
+
+            clearInterval(timer);
+            document.getElementById('userAnswer').disabled = true;
+        }
+
+        // 重置遊戲
+        function resetGame() {
+            clearInterval(timer);
+            document.getElementById('userAnswer').value = '';
+            document.getElementById('userAnswer').disabled = true;
+            document.getElementById('totalPot').value = '';
+            document.getElementById('result').innerText = '';
+            document.getElementById('timer').innerText = '剩餘時間：30 秒';
+        }
+    </script>
+</body>
+</html>
